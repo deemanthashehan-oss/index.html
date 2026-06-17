@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚛️ Molecular Weight Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f6f9fc 0%, #e6f0f5 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    .card {
+      max-width: 720px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 3.5rem;
+      padding: 2.5rem 2.8rem;
+      box-shadow: 0 20px 40px rgba(0, 20, 30, 0.2), 
+                  0 8px 16px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-weight: 600;
+      font-size: 2.2rem;
+      letter-spacing: -0.5px;
+      color: #0b2a3b;
+      margin-bottom: 0.25rem;
+    }
+
+    h1 small {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #2d5a73;
+      margin-left: 0.3rem;
+      background: rgba(45, 90, 115, 0.08);
+      padding: 0.2rem 0.9rem;
+      border-radius: 40px;
+      letter-spacing: 0.3px;
+    }
+
+    .subhead {
+      color: #2b4f5e;
+      font-size: 1rem;
+      font-weight: 400;
+      margin-bottom: 2rem;
+      border-left: 4px solid #3c8d9c;
+      padding-left: 1rem;
+      background: rgba(60, 141, 156, 0.04);
+      border-radius: 0 12px 12px 0;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .input-group label {
+      font-weight: 500;
+      color: #124052;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .input-group label span {
+      background: #d0e2eb;
+      padding: 0.1rem 0.7rem;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #104257;
+      letter-spacing: 0.3px;
+    }
+
+    .formula-input-wrapper {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 60px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.02), 0 4px 12px rgba(0, 30, 40, 0.06);
+      border: 1px solid #cfe0e9;
+      transition: 0.2s;
+    }
+
+    .formula-input-wrapper:focus-within {
+      border-color: #2f8b9e;
+      box-shadow: 0 0 0 4px rgba(47, 139, 158, 0.15), inset 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .formula-input-wrapper input {
+      border: none;
+      padding: 1rem 1.5rem;
+      font-size: 1.25rem;
+      width: 100%;
+      background: transparent;
+      border-radius: 60px;
+      outline: none;
+      font-weight: 500;
+      color: #0a2a38;
+      letter-spacing: 0.3px;
+    }
+
+    .formula-input-wrapper input::placeholder {
+      color: #92afbe;
+      font-weight: 400;
+      letter-spacing: 0.2px;
+      font-size: 1rem;
+    }
+
+    .clear-btn {
+      background: transparent;
+      border: none;
+      color: #628d9e;
+      padding: 0 1.2rem 0 0.2rem;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+    }
+
+    .clear-btn:hover {
+      opacity: 1;
+      color: #1b5062;
+      transform: scale(1.1);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 1.5rem 0 1.2rem;
+    }
+
+    .btn {
+      background: white;
+      border: none;
+      padding: 0.9rem 2.2rem;
+      border-radius: 80px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #0b2e3e;
+      box-shadow: 0 4px 10px rgba(0, 20, 30, 0.06);
+      border: 1px solid #c7dce7;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #f0f7fb;
+    }
+
+    .btn-primary {
+      background: #1a5f74;
+      border: 1px solid #1a5f74;
+      color: white;
+      box-shadow: 0 8px 16px -6px rgba(26, 95, 116, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: #0f4a5c;
+      transform: scale(1.01);
+      border-color: #0f4a5c;
+      box-shadow: 0 10px 20px -8px rgba(15, 74, 92, 0.4);
+    }
+
+    .btn-secondary:hover {
+      background: #e4eef4;
+      border-color: #aec9d6;
+    }
+
+    .result-box {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: 2.5rem;
+      padding: 1.8rem 2rem;
+      margin: 1.8rem 0 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.02), 0 6px 14px rgba(0, 20, 30, 0.06);
+    }
+
+    .result-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #3c6f82;
+      margin-bottom: 0.4rem;
+    }
+
+    .result-value {
+      font-size: 2.8rem;
+      font-weight: 600;
+      color: #053340;
+      letter-spacing: -0.5px;
+      word-break: break-all;
+      line-height: 1.2;
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.3rem 0.8rem;
+    }
+
+    .result-value .unit {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: #3a7388;
+      margin-left: 0.2rem;
+    }
+
+    .result-value .error-msg {
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: #b13e3e;
+      background: rgba(177, 62, 62, 0.06);
+      padding: 0.2rem 1.2rem;
+      border-radius: 60px;
+    }
+
+    .example-hint {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #2b637a;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.8rem;
+      border-top: 1px solid #d3e3ed;
+      padding-top: 1.4rem;
+    }
+
+    .example-hint strong {
+      font-weight: 500;
+      color: #0f4457;
+    }
+
+    .example-badge {
+      background: #d7e7f0;
+      padding: 0.3rem 1.1rem;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: #0b3f52;
+      cursor: pointer;
+      transition: 0.15s;
+      border: 1px solid transparent;
+    }
+
+    .example-badge:hover {
+      background: #c0dae8;
+      border-color: #8bb6c9;
+      transform: scale(1.02);
+    }
+
+    .footer-note {
+      font-size: 0.75rem;
+      color: #537b8b;
+      margin-top: 2rem;
+      text-align: center;
+      opacity: 0.7;
+      letter-spacing: 0.3px;
+    }
+
+    /* responsive */
+    @media (max-width: 550px) {
+      .card {
+        padding: 1.8rem 1.5rem;
+        border-radius: 2.5rem;
+      }
+      h1 {
+        font-size: 1.8rem;
+        flex-wrap: wrap;
+      }
+      .result-value {
+        font-size: 2.2rem;
+      }
+      .action-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn {
+        justify-content: center;
+        padding: 0.8rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>
+    ⚛️ Molar mass
+    <small>calculator</small>
+  </h1>
+  <div class="subhead">
+    Enter a chemical formula &nbsp;·&nbsp; e.g. H<sub>2</sub>O, C<sub>6</sub>H<sub>12</sub>O<sub>6</sub>, NaCl
+  </div>
+
+  <div class="input-group">
+    <label>
+      <span>Formula</span>
+    </label>
+    <div class="formula-input-wrapper">
+      <input type="text" id="formulaInput" placeholder="e.g. H2O, CO2, C6H12O6" value="H2O" spellcheck="false" autofocus>
+      <button class="clear-btn" id="clearBtn" aria-label="Clear input">✕</button>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" id="calculateBtn">🧪 Calculate</button>
+    <button class="btn btn-secondary" id="resetBtn">↺ Reset</button>
+  </div>
+
+  <div class="result-box" id="resultBox">
+    <div class="result-label">Molecular weight</div>
+    <div class="result-value" id="resultDisplay">
+      <span>18.015</span>
+      <span class="unit">g/mol</span>
+    </div>
+  </div>
+
+  <div class="example-hint">
+    <strong>⚡ Quick examples:</strong>
+    <span class="example-badge" data-formula="H2O">H₂O</span>
+    <span class="example-badge" data-formula="NaCl">NaCl</span>
+    <span class="example-badge" data-formula="C6H12O6">C₆H₁₂O₆</span>
+    <span class="example-badge" data-formula="CaCO3">CaCO₃</span>
+    <span class="example-badge" data-formula="H2SO4">H₂SO₄</span>
+  </div>
+  <div class="footer-note">
+    supports parentheses · case‑sensitive (e.g. Co vs CO)
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ----- atomic masses (g/mol) -----
+    const atomicMasses = {
+      H: 1.008,
+      He: 4.0026,
+      Li: 6.94,
+      Be: 9.0122,
+      B: 10.81,
+      C: 12.011,
+      N: 14.007,
+      O: 15.999,
+      F: 18.998,
+      Ne: 20.180,
+      Na: 22.990,
+      Mg: 24.305,
+      Al: 26.982,
+      Si: 28.085,
+      P: 30.974,
+      S: 32.06,
+      Cl: 35.45,
+      Ar: 39.948,
+      K: 39.098,
+      Ca: 40.078,
+      Sc: 44.956,
+      Ti: 47.867,
+      V: 50.942,
+      Cr: 51.996,
+      Mn: 54.938,
+      Fe: 55.845,
+      Co: 58.933,
+      Ni: 58.693,
+      Cu: 63.546,
+      Zn: 65.38,
+      Ga: 69.723,
+      Ge: 72.63,
+      As: 74.922,
+      Se: 78.96,
+      Br: 79.904,
+      Kr: 83.798,
+      Rb: 85.468,
+      Sr: 87.62,
+      Y: 88.906,
+      Zr: 91.224,
+      Nb: 92.906,
+      Mo: 95.95,
+      Tc: 98,
+      Ru: 101.07,
+      Rh: 102.91,
+      Pd: 106.42,
+      Ag: 107.87,
+      Cd: 112.41,
+      In: 114.82,
+      Sn: 118.71,
+      Sb: 121.76,
+      Te: 127.60,
+      I: 126.90,
+      Xe: 131.29,
+      Cs: 132.91,
+      Ba: 137.33,
+      La: 138.91,
+      Ce: 140.12,
+      Pr: 140.91,
+      Nd: 144.24,
+      Pm: 145,
+      Sm: 150.36,
+      Eu: 151.96,
+      Gd: 157.25,
+      Tb: 158.93,
+      Dy: 162.50,
+      Ho: 164.93,
+      Er: 167.26,
+      Tm: 168.93,
+      Yb: 173.05,
+      Lu: 174.97,
+      Hf: 178.49,
+      Ta: 180.95,
+      W: 183.84,
+      Re: 186.21,
+      Os: 190.23,
+      Ir: 192.22,
+      Pt: 195.08,
+      Au: 196.97,
+      Hg: 200.59,
+      Tl: 204.38,
+      Pb: 207.2,
+      Bi: 208.98,
+      Po: 209,
+      At: 210,
+      Rn: 222,
+      Fr: 223,
+      Ra: 226,
+      Ac: 227,
+      Th: 232.04,
+      Pa: 231.04,
+      U: 238.03,
+      Np: 237,
+      Pu: 244,
+      Am: 243,
+      Cm: 247,
+      Bk: 247,
+      Cf: 251,
+      Es: 252,
+      Fm: 257,
+      Md: 258,
+      No: 259,
+      Lr: 266,
+      Rf: 267,
+      Db: 268,
+      Sg: 269,
+      Bh: 270,
+      Hs: 270,
+      Mt: 278,
+      Ds: 281,
+      Rg: 282,
+      Cn: 285,
+      Nh: 286,
+      Fl: 289,
+      Mc: 290,
+      Lv: 293,
+      Ts: 294,
+      Og: 294
+    };
+
+    // DOM elements
+    const formulaInput = document.getElementById('formulaInput');
+    const resultDisplay = document.getElementById('resultDisplay');
+    const calculateBtn = document.getElementById('calculateBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    // helper: display result
+    function setResult(value, unit = 'g/mol', isError = false) {
+      if (isError) {
+        resultDisplay.innerHTML = `<span class="error-msg">${value}</span>`;
+      } else {
+        resultDisplay.innerHTML = `<span>${value}</span><span class="unit">${unit}</span>`;
+      }
+    }
+
+    // ----- core parser: returns molecular weight or throws error -----
+    function parseFormula(formula) {
+      // clean up: remove spaces, tabs, newlines
+      const clean = formula.replace(/\s/g, '');
+      if (clean === '') throw new Error('Please enter a formula.');
+
+      // We'll use a recursive descent with index pointer.
+      // But we can implement a simpler stack-based approach with regex?
+      // For robust parentheses and element parsing, we'll use a tokenizer + recursive parser.
+
+      // ---- Tokenizer ----
+      const tokens = [];
+      let i = 0;
+      while (i < clean.length) {
+        const ch = clean[i];
+        if (ch === '(' || ch === ')') {
+          tokens.push({ type: 'paren', value: ch });
+          i++;
+        } else if (ch >= 'A' && ch <= 'Z') {
+          // element symbol: one uppercase + optional lowercase
+          let symbol = ch;
+          i++;
+          if (i < clean.length && clean[i] >= 'a' && clean[i] <= 'z') {
+            symbol += clean[i];
+            i++;
+          }
+          // parse following number (digits)
+          let numStr = '';
+          while (i < clean.length && clean[i] >= '0' && clean[i] <= '9') {
+            numStr += clean[i];
+            i++;
+          }
+          const count = numStr === '' ? 1 : parseInt(numStr, 10);
+          tokens.push({ type: 'element', symbol, count });
+        } else if (ch >= '0' && ch <= '9') {
+          // number without preceding element? not valid, but we'll handle as error
+          throw new Error(`Unexpected number '${ch}' at position ${i}.`);
+        } else {
+          throw new Error(`Invalid character '${ch}' at position ${i}.`);
+        }
+      }
+
+      // ---- Recursive parser for parentheses ----
+      // We'll convert tokens to a flat list with multipliers.
+      // Use a stack to handle parentheses.
+      // Strategy: iterate tokens, when we see '(' push a new context, when ')' pop and multiply.
+      // But easier: use a stack of objects { elements: {symbol: count} } and multiplier.
+      // However we can do a two-pass: first group tokens into nested arrays, then multiply.
+
+      // Build nested structure using recursion on token index
+      function parseGroup(startIdx) {
+        const group = [];
+        let idx = startIdx;
+        while (idx < tokens.length) {
+          const token = tokens[idx];
+          if (token.type === 'paren' && token.value === ')') {
+            // closing parenthesis: return group and next index
+            return { group, nextIdx: idx + 1 };
+          } else if (token.type === 'paren' && token.value === '(') {
+            // recursive parse inner group
+            const inner = parseGroup(idx + 1);
+            // after inner, we expect a number (count) for the group
+            let multiplier = 1;
+            if (inner.nextIdx < tokens.length && tokens[inner.nextIdx].type === 'element' && !isNaN(tokens[inner.nextIdx].count)) {
+              // but careful: after ')', a number is a separate element token with symbol?
+              // Actually the tokenizer produces element token for numbers only if preceded by element.
+              // For group multiplier we need to read digits manually.
+              // Better approach: after inner group, check if next token is a number (but our tokenizer doesn't produce number token alone)
+              // We'll manually look for digits after ')'
+              // Let's extract multiplier from raw string after ')'
+              // We'll use the original string to parse multiplier.
+              // Simpler: we can re-tokenize numbers after ')' as separate count.
+              // quick fix: we'll handle multiplier by looking ahead in original string.
+              // But to keep robust: we'll adjust tokenizer to produce number tokens.
+              // Let's extend tokenizer to produce number tokens for standalone digits (but we handle in element)
+              // Actually our tokenizer merges digits into element token. For group multiplier we need separate.
+              // So we modify tokenizer: after closing paren, we'll parse digits as a number token.
+              // We'll implement a quick patch: tokenizer already consumed digits after element; we need to handle digits after ')'
+              // Since we have the original string, we'll re-parse multiplier from raw formula.
+              // For simplicity, we'll backtrack in the tokens list: after ')', check if following token is element with symbol a number? Not possible.
+              // So we adjust tokenizer: when we see a digit, if previous token is ')' we'll create a number token.
+              // But for simplicity, I'll implement a different approach: use a stack with explicit multiplier.
+              // I'll rewrite parser to be simpler with a stack.
+              throw new Error('Group multiplier not implemented in this version (use simpler parser)');
+            }
+            // fallback multiplier 1
+            // Multiply inner group elements by multiplier and add to current group
+            for (const [symbol, count] of Object.entries(inner.group)) {
+              group[symbol] = (group[symbol] || 0) + count * multiplier;
+            }
+            idx = inner.nextIdx;
+            // after inner group, if there is a number, we need to consume it: but we skipped because tokenizer didn't create number token.
+            // Instead we use a simple approach: after ')', manually parse digits.
+            // We'll parse digits directly from clean string at position i.
+            // But we have lost position. So we'll parse formula using a different method: 
+            // Use regular expression based approach with recursive parsing.
+            // Given time, I'll switch to a robust regex-based recursive parser.
+            // The code below is a placeholder for the full parser; I'll replace with simpler method.
+          } else if (token.type === 'element') {
+            // add element to group
+            const symbol = token.symbol;
+            const count = token.count;
+            group[symbol] = (group[symbol] || 0) + count;
+            idx++;
+          } else {
+            idx++;
+          }
+        }
+        return { group, nextIdx: idx };
+      }
+
+      // Due to time, I'll implement a cleaner parser using a stack and manual scanning.
+      // I'll use a different approach: scan the formula with a stack of maps.
+      // Let's use a simple iterative method with a stack.
+      // This is a reimplementation to ensure parentheses work.
+      // We'll parse the string manually.
+      function parseWithStack(formulaStr) {
+        const stack = [{}]; // stack of maps
+        const multipliers = [1];
+        let i = 0;
+        while (i < formulaStr.length) {
+          const ch = formulaStr[i];
+          if (ch === '(') {
+            stack.push({});
+            multipliers.push(1);
+            i++;
+          } else if (ch === ')') {
+            i++;
+            // read multiplier number
+            let numStr = '';
+            while (i < formulaStr.length && formulaStr[i] >= '0' && formulaStr[i] <= '9') {
+              numStr += formulaStr[i];
+              i++;
+            }
+            const multiplier = numStr === '' ? 1 : parseInt(numStr, 10);
+            const innerMap = stack.pop();
+            multipliers.pop();
+            // multiply inner map and add to parent
+            const parent = stack[stack.length - 1];
+            for (const [symbol, count] of Object.entries(innerMap)) {
+              parent[symbol] = (parent[symbol] || 0) + count * multiplier;
+            }
+          } else if (ch >= 'A' && ch <= 'Z') {
+            let symbol = ch;
+            i++;
+            if (i < formulaStr.length && formulaStr[i] >= 'a' && formulaStr[i] <= 'z') {
+              symbol += formulaStr[i];
+              i++;
+            }
+            // parse count
+            let numStr = '';
+            while (i < formulaStr.length && formulaStr[i] >= '0' && formulaStr[i] <= '9') {
+              numStr += formulaStr[i];
+              i++;
+            }
+            const count = numStr === '' ? 1 : parseInt(numStr, 10);
+            const current = stack[stack.length - 1];
+            current[symbol] = (current[symbol] || 0) + count;
+          } else {
+            throw new Error(`Unexpected character '${ch}'`);
+          }
+        }
+        if (stack.length !== 1) throw new Error('Unbalanced parentheses');
+        return stack[0];
+      }
+
+      // use the stack parser
+      const elementCounts = parseWithStack(clean);
+
+      // compute molecular weight
+      let total = 0;
+      for (const [symbol, count] of Object.entries(elementCounts)) {
+        if (!atomicMasses[symbol]) {
+          throw new Error(`Unknown element: '${symbol}'`);
+        }
+        total += atomicMasses[symbol] * count;
+      }
+      return total;
+    }
+
+    // ----- calculate and display -----
+    function calculate() {
+      const formula = formulaInput.value.trim();
+      try {
+        const weight = parseFormula(formula);
+        // format to 3 decimal places (or more if needed)
+        const formatted = weight.toFixed(3);
+        setResult(formatted, 'g/mol', false);
+      } catch (err) {
+        setResult(err.message, '', true);
+      }
+    }
+
+    // reset to default (H2O)
+    function resetCalculator() {
+      formulaInput.value = 'H2O';
+      calculate();
+    }
+
+    // clear input
+    function clearInput() {
+      formulaInput.value = '';
+      formulaInput.focus();
+      setResult('—', '', true);
+    }
+
+    // event listeners
+    calculateBtn.addEventListener('click', calculate);
+    resetBtn.addEventListener('click', resetCalculator);
+    clearBtn.addEventListener('click', clearInput);
+
+    // Enter key trigger
+    formulaInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        calculate();
+      }
+    });
+
+    // example badges
+    document.querySelectorAll('.example-badge').forEach(badge => {
+      badge.addEventListener('click', function() {
+        const formula = this.dataset.formula;
+        formulaInput.value = formula;
+        calculate();
+      });
+    });
+
+    // initial calculation
+    calculate();
+  })();
+</script>
+
+</body>
+</html>
