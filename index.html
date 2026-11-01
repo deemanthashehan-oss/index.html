@@ -12,15 +12,109 @@
     background: #f4f6fa;
     color: #101828;
   }
+  .hidden { display: none !important; }
+
+  /* ---------- AUTH SCREEN ---------- */
+  .auth-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: radial-gradient(circle at top left, #e8f0fb, #f4f6fa 60%);
+  }
+  .auth-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 34px 28px 26px;
+    box-shadow: 0 8px 32px rgba(16,24,40,.1);
+    width: 100%;
+    max-width: 400px;
+  }
+  .auth-title { font-size: 24px; margin: 0 0 4px; text-align: center; }
+  .auth-sub { text-align: center; color: #667085; margin: 0 0 26px; font-size: 14px; }
+  .auth-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475467;
+    margin-bottom: 14px;
+  }
+  .auth-label input {
+    padding: 11px 12px;
+    font-size: 15px;
+    font-family: inherit;
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    background: #fff;
+    color: #101828;
+    width: 100%;
+  }
+  .auth-label input:focus { outline: 2px solid #b6d0ee; border-color: #4e79a7; }
+  .auth-submit {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    margin-top: 6px;
+  }
+  .auth-msg { font-size: 13px; margin: 4px 0 12px; min-height: 18px; }
+  .auth-msg.err { color: #e15759; }
+  .auth-msg.ok  { color: #2f9e44; }
+  .auth-toggle { text-align: center; font-size: 13px; color: #667085; margin-top: 18px; }
+  .link-btn { background: none; color: #4e79a7; font-weight: 600; text-decoration: underline; padding: 0; font-size: 13px; }
+  .link-btn:hover { color: #3f6288; }
+  .auth-note { text-align: center; font-size: 11px; color: #98a2b3; margin: 20px 0 0; line-height: 1.5; }
+
+  /* ---------- APP SHELL ---------- */
   .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
 
-  header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
-  h1 { font-size: 22px; margin: 0; }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  header h1 { font-size: 22px; margin: 0 0 4px; }
+  .greeting { font-size: 12px; color: #667085; }
+  .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: #fff;
+    border: 1px solid #eaecf0;
+    border-radius: 999px;
+    padding: 4px 12px 4px 4px;
+    font-size: 13px;
+    color: #475467;
+    box-shadow: 0 1px 2px rgba(16,24,40,.04);
+  }
+  .user-chip b { color: #101828; }
+  .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4e79a7, #2f9e44);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
   h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .07em; color: #475467; margin: 0 0 14px; }
 
-  .monthnav { display: flex; align-items: center; gap: 8px; }
-  .monthnav select { min-width: 160px; }
-  .arrow { width: 36px; height: 36px; padding: 0; font-size: 14px; }
+  .monthnav { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 4px; box-shadow: 0 1px 2px rgba(16,24,40,.06); }
+  .monthnav select { min-width: 150px; border: none; background: transparent; font-weight: 600; padding: 6px 10px; }
+  .monthnav select:focus { outline: none; }
+  .arrow { width: 32px; height: 32px; padding: 0; font-size: 13px; border-radius: 50%; background: #f4f6fa; border: none; color: #475467; font-weight: 700; }
+  .arrow:hover { background: #e8eef7; }
 
   /* ---------- summary cards ---------- */
   .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
@@ -115,133 +209,173 @@
     .cards { grid-template-columns: 1fr; }
     .target-row { grid-template-columns: 1fr; gap: 14px; }
     canvas { width: 160px; height: 160px; }
+    .user-chip span.name { display: none; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <header>
-    <h1>💰 Financial Tracker</h1>
-    <div class="monthnav">
-      <button id="prevMonth" class="btn-ghost arrow" title="Previous month">◀</button>
-      <select id="monthFilter" aria-label="Month"></select>
-      <button id="nextMonth" class="btn-ghost arrow" title="Next month">▶</button>
-    </div>
-  </header>
-
-  <!-- SUMMARY -->
-  <section class="cards">
-    <div class="card income"><span>Income</span><strong id="totalIncome">0</strong></div>
-    <div class="card expense"><span>Expenses</span><strong id="totalExpense">0</strong></div>
-    <div class="card saved"><span>Saved</span><strong id="totalSaved">0</strong></div>
-  </section>
-
-  <!-- SAVINGS TARGET -->
-  <section class="panel">
-    <h2>🎯 Savings target — <span id="targetMonthLabel"></span></h2>
-    <div class="target-row">
-      <label>Target for this month
-        <input type="text" inputmode="decimal" id="targetInput" placeholder="e.g. 5,000">
+<!-- ================= LOGIN / SIGNUP ================= -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <h1 class="auth-title">💰 Financial Tracker</h1>
+    <p class="auth-sub" id="authSub">Sign in to your account</p>
+    <form id="authForm" novalidate>
+      <label class="auth-label">Username
+        <input type="text" id="authUser" autocomplete="username" required>
       </label>
-      <div>
-        <div class="progress"><i id="progressBar"></i></div>
-        <div class="ptext" id="progressText"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ADD ENTRY -->
-  <section class="panel">
-    <h2>Add entry for <span id="formMonthLabel"></span></h2>
-    <form id="entryForm">
-      <div class="row">
-        <label>Date<input type="date" id="date" required></label>
-        <label>Type
-          <select id="type">
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
-        </label>
-        <label>Category<select id="category"></select></label>
-        <label>Amount<input type="text" inputmode="decimal" id="amount" placeholder="0.00" required></label>
-        <label>Note<input type="text" id="note" placeholder="optional"></label>
-        <button class="btn-primary" type="submit">Add</button>
-      </div>
+      <label class="auth-label">Password
+        <input type="password" id="authPass" autocomplete="current-password" required>
+      </label>
+      <div class="auth-msg" id="authMsg"></div>
+      <button type="submit" class="btn-primary auth-submit" id="authSubmit">Sign In</button>
     </form>
-  </section>
+    <div class="auth-toggle">
+      <span id="authToggleText">Don't have an account?</span>
+      <button type="button" class="link-btn" id="authToggle">Create one</button>
+    </div>
+    <p class="auth-note">🔒 Your data stays in this browser only.<br>Passwords are hashed, but this is a local demo — don't reuse important passwords.</p>
+  </div>
+</div>
 
-  <!-- CHARTS -->
-  <section class="charts">
-    <div class="chartbox">
-      <h2>Expenses by category</h2>
-      <div class="chartflex">
-        <canvas id="expensePie"></canvas>
-        <ul class="legend" id="expenseLegend"></ul>
+<!-- ================= MAIN APP ================= -->
+<div id="appScreen" class="hidden">
+  <div class="wrap">
+
+    <header>
+      <div>
+        <h1>💰 Financial Tracker</h1>
+        <div class="greeting" id="greetLine"></div>
       </div>
-    </div>
-    <div class="chartbox">
-      <h2>Income by category</h2>
-      <div class="chartflex">
-        <canvas id="incomePie"></canvas>
-        <ul class="legend" id="incomeLegend"></ul>
+      <div class="header-right">
+        <div class="user-chip">
+          <span class="avatar" id="userAvatar">?</span>
+          <span class="name">Hi, <b id="greetName"></b></span>
+        </div>
+        <div class="monthnav">
+          <button id="prevMonth" class="arrow" title="Previous month">◀</button>
+          <select id="monthFilter" aria-label="Month"></select>
+          <button id="nextMonth" class="arrow" title="Next month">▶</button>
+        </div>
+        <button id="logoutBtn" class="btn-ghost">Logout</button>
       </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- ENTRIES -->
-  <section class="panel">
-    <div class="panel-head">
-      <h2>Entries — <span id="entryMonthLabel"></span></h2>
-      <div style="display:flex; gap:8px;">
-        <button class="btn-ghost" id="exportBtn">Export CSV</button>
-        <button class="btn-ghost" id="clearBtn">Clear all</button>
+    <!-- SUMMARY -->
+    <section class="cards">
+      <div class="card income"><span>Income</span><strong id="totalIncome">0</strong></div>
+      <div class="card expense"><span>Expenses</span><strong id="totalExpense">0</strong></div>
+      <div class="card saved"><span>Saved</span><strong id="totalSaved">0</strong></div>
+    </section>
+
+    <!-- SAVINGS TARGET -->
+    <section class="panel">
+      <h2>🎯 Savings target — <span id="targetMonthLabel"></span></h2>
+      <div class="target-row">
+        <label>Target for this month
+          <input type="text" inputmode="decimal" id="targetInput" placeholder="e.g. 5,000">
+        </label>
+        <div>
+          <div class="progress"><i id="progressBar"></i></div>
+          <div class="ptext" id="progressText"></div>
+        </div>
       </div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th><th>Type</th><th>Category</th><th>Note</th>
-            <th class="right">Amount</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="entryTable"></tbody>
-      </table>
-    </div>
-  </section>
+    </section>
 
-  <!-- MONTHLY OVERVIEW -->
-  <section class="panel">
-    <h2>📅 Monthly overview</h2>
-    <div class="table-wrap" style="margin-top:0;">
-      <table id="overviewTable">
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th class="right">Income</th>
-            <th class="right">Expenses</th>
-            <th class="right">Saved</th>
-            <th class="right">Target</th>
-            <th class="right">Progress</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-        <tfoot></tfoot>
-      </table>
-    </div>
-  </section>
+    <!-- ADD ENTRY -->
+    <section class="panel">
+      <h2>Add entry for <span id="formMonthLabel"></span></h2>
+      <form id="entryForm">
+        <div class="row">
+          <label>Date<input type="date" id="date" required></label>
+          <label>Type
+            <select id="type">
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </label>
+          <label>Category<select id="category"></select></label>
+          <label>Amount<input type="text" inputmode="decimal" id="amount" placeholder="0.00" required></label>
+          <label>Note<input type="text" id="note" placeholder="optional"></label>
+          <button class="btn-primary" type="submit">Add</button>
+        </div>
+      </form>
+    </section>
 
+    <!-- CHARTS -->
+    <section class="charts">
+      <div class="chartbox">
+        <h2>Expenses by category</h2>
+        <div class="chartflex">
+          <canvas id="expensePie"></canvas>
+          <ul class="legend" id="expenseLegend"></ul>
+        </div>
+      </div>
+      <div class="chartbox">
+        <h2>Income by category</h2>
+        <div class="chartflex">
+          <canvas id="incomePie"></canvas>
+          <ul class="legend" id="incomeLegend"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENTRIES -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Entries — <span id="entryMonthLabel"></span></h2>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-ghost" id="exportBtn">Export CSV</button>
+          <button class="btn-ghost" id="clearBtn">Clear all</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Type</th><th>Category</th><th>Note</th>
+              <th class="right">Amount</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="entryTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- MONTHLY OVERVIEW -->
+    <section class="panel">
+      <h2>📅 Monthly overview</h2>
+      <div class="table-wrap" style="margin-top:0;">
+        <table id="overviewTable">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th class="right">Income</th>
+              <th class="right">Expenses</th>
+              <th class="right">Saved</th>
+              <th class="right">Target</th>
+              <th class="right">Progress</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot></tfoot>
+        </table>
+      </div>
+    </section>
+
+  </div>
 </div>
 
 <script>
 /* ============================================================
-   1. CONFIG — edit to change currency or categories
+   1. CONFIG
    ============================================================ */
-const CURRENCY = '$';                      // '₹', '€', 'Rs ', etc.
+const CURRENCY = 'Rs ';
 
-const STORAGE_KEY = 'finance-tracker-v1';  // entries
-const TARGET_KEY  = 'finance-targets-v1';  // savings targets per month
+const USERS_KEY    = 'finance-users-v1';      // { username: { hash, createdAt } }
+const SESSION_KEY  = 'finance-session-v1';    // currently logged-in username
+const ENTRIES_PFX  = 'finance-entries-v1_';   // + username
+const TARGETS_PFX  = 'finance-targets-v1_';   // + username
 
 const CATEGORIES = {
   income:  ['Salary', 'Class Fee'],
@@ -263,22 +397,17 @@ function colorFor(type, cat) {
 }
 
 /* ============================================================
-   2. STATE
+   2. GLOBAL STATE
    ============================================================ */
 const $ = id => document.getElementById(id);
 
+let currentUser = null;
 let entries = [];
-try {
-  const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  if (Array.isArray(raw)) entries = raw;
-} catch (e) { entries = []; }
-
 let targets = {};
-try {
-  const raw = JSON.parse(localStorage.getItem(TARGET_KEY));
-  if (raw && typeof raw === 'object') targets = raw;
-} catch (e) { targets = {}; }
+let currentMonth = todayMonth();
+let authMode = 'login';
 
+/* ---------- element refs ---------- */
 const monthSel   = $('monthFilter');
 const form       = $('entryForm');
 const dateInput  = $('date');
@@ -289,53 +418,197 @@ const noteIn     = $('note');
 const targetInput= $('targetInput');
 const tbody      = $('entryTable');
 
-/* ---------- number formatting helpers ---------- */
+/* ============================================================
+   3. AUTH HELPERS
+   ============================================================ */
+let users = {};
+try {
+  const raw = JSON.parse(localStorage.getItem(USERS_KEY));
+  if (raw && typeof raw === 'object') users = raw;
+} catch (e) { users = {}; }
+
+function saveUsers() { localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
+
+async function hashPassword(pw) {
+  const data = new TextEncoder().encode(pw + '::finance-salt::v1');
+  if (window.crypto && crypto.subtle) {
+    try {
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) { /* fall through */ }
+  }
+  // fallback (non-crypto) hash for environments where SubtleCrypto is unavailable
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < pw.length; i++) {
+    const ch = pw.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 'fb_' + (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+}
+
+function setAuthMsg(text, cls) {
+  const m = $('authMsg');
+  m.textContent = text;
+  m.className = 'auth-msg' + (cls ? ' ' + cls : '');
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  if (mode === 'login') {
+    $('authSub').textContent = 'Sign in to your account';
+    $('authSubmit').textContent = 'Sign In';
+    $('authToggleText').textContent = "Don't have an account?";
+    $('authToggle').textContent = 'Create one';
+    $('authPass').autocomplete = 'current-password';
+  } else {
+    $('authSub').textContent = 'Create your account';
+    $('authSubmit').textContent = 'Sign Up';
+    $('authToggleText').textContent = 'Already have an account?';
+    $('authToggle').textContent = 'Sign in';
+    $('authPass').autocomplete = 'new-password';
+  }
+  setAuthMsg('', '');
+}
+
+$('authToggle').addEventListener('click', () => {
+  setAuthMode(authMode === 'login' ? 'signup' : 'login');
+});
+
+$('authForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+
+  const username = $('authUser').value.trim().toLowerCase();
+  const password = $('authPass').value;
+
+  if (username.length < 3) { setAuthMsg('Username must be at least 3 characters.', 'err'); return; }
+  if (!/^[a-z0-9_]+$/.test(username)) {
+    setAuthMsg('Username can only contain letters, numbers, and underscores.', 'err'); return;
+  }
+  if (password.length < 4) { setAuthMsg('Password must be at least 4 characters.', 'err'); return; }
+
+  const hash = await hashPassword(password);
+
+  if (authMode === 'signup') {
+    if (users[username]) { setAuthMsg('That username is already taken.', 'err'); return; }
+    users[username] = { hash, createdAt: Date.now() };
+    saveUsers();
+    setAuthMsg('Account created! Signing you in…', 'ok');
+    setTimeout(() => doLogin(username), 350);
+  } else {
+    if (!users[username]) { setAuthMsg('No account found with that username.', 'err'); return; }
+    if (users[username].hash !== hash) { setAuthMsg('Incorrect password.', 'err'); return; }
+    doLogin(username);
+  }
+});
+
+/* ============================================================
+   4. SESSION & USER-SCOPED STORAGE
+   ============================================================ */
+const entriesKey = () => ENTRIES_PFX + currentUser;
+const targetsKey = () => TARGETS_PFX + currentUser;
+
+function loadUserData() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(entriesKey()));
+    entries = Array.isArray(raw) ? raw : [];
+  } catch (e) { entries = []; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(targetsKey()));
+    targets = (raw && typeof raw === 'object') ? raw : {};
+  } catch (e) { targets = {}; }
+}
+
+const saveEntries = () => localStorage.setItem(entriesKey(), JSON.stringify(entries));
+const saveTargets = () => localStorage.setItem(targetsKey(), JSON.stringify(targets));
+
+function doLogin(username) {
+  currentUser = username;
+  localStorage.setItem(SESSION_KEY, username);
+
+  // reset state from previous session
+  entries = [];
+  targets = {};
+  currentMonth = todayMonth();
+
+  // personalise UI
+  const nice = username.charAt(0).toUpperCase() + username.slice(1);
+  $('greetName').textContent = nice;
+  $('userAvatar').textContent = username.charAt(0).toUpperCase();
+  $('greetLine').textContent = `Signed in as ${nice} · ${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}`;
+
+  // show app
+  $('authScreen').classList.add('hidden');
+  $('appScreen').classList.remove('hidden');
+
+  initApp();
+}
+
+function doLogout() {
+  if (!confirm('Log out? Your data is saved and will be here when you return.')) return;
+  currentUser = null;
+  localStorage.removeItem(SESSION_KEY);
+
+  // wipe in-memory state
+  entries = [];
+  targets = [];
+
+  // reset form fields
+  $('authForm').reset();
+  $('authUser').value = '';
+  $('authPass').value = '';
+  setAuthMode('login');
+  setAuthMsg('', '');
+
+  // swap screens
+  $('appScreen').classList.add('hidden');
+  $('authScreen').classList.remove('hidden');
+  $('authUser').focus();
+}
+
+$('logoutBtn').addEventListener('click', doLogout);
+
+/* ============================================================
+   5. DATE / FORMAT HELPERS
+   ============================================================ */
+function isoDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function todayMonth() { return isoDate(new Date()).slice(0, 7); }
+
+function monthLabel(m) {
+  const [y, mo] = m.split('-');
+  return new Date(+y, +mo - 1, 1).toLocaleString(undefined, { month: 'short', year: 'numeric' });
+}
+function monthAdd(m, delta) {
+  const [y, mo] = m.split('-').map(Number);
+  const d = new Date(y, mo - 1 + delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+function defaultDateFor(m) {
+  return (m === todayMonth()) ? isoDate(new Date()) : m + '-01';
+}
+
+/* ---------- number formatting (comma every 3 digits) ---------- */
 function formatNumberInput(str) {
-  // remove everything except digits and dot
-  let clean = str.replace(/[^0-9.]/g, '');
-  // only one dot allowed
+  let clean = String(str).replace(/[^0-9.]/g, '');
   const parts = clean.split('.');
   if (parts.length > 2) parts.splice(2);
   let intPart = parts[0] || '';
-  let decPart = parts[1] !== undefined ? parts[1] : '';
-  // remove leading zeros in int part but keep single zero
+  const decPart = parts[1] !== undefined ? parts[1] : '';
   intPart = intPart.replace(/^0+(?=\d)/, '');
-  // format int part with commas
-  let formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  // reassemble
+  const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   let result = formattedInt;
-  if (parts.length > 1) {
-    result += '.' + decPart.slice(0, 2); // allow up to 2 decimals
-  }
+  if (parts.length > 1) result += '.' + decPart.slice(0, 2);
   return result;
 }
-
 function parseFormattedNumber(str) {
-  const cleaned = str.replace(/,/g, '');
+  const cleaned = String(str).replace(/,/g, '');
   const num = parseFloat(cleaned);
   return isFinite(num) ? num : 0;
 }
-
-/* apply formatting on input for amount and target */
-amountIn.addEventListener('input', () => {
-  const pos = amountIn.selectionStart;
-  const oldVal = amountIn.value;
-  const newVal = formatNumberInput(oldVal);
-  if (newVal !== oldVal) {
-    amountIn.value = newVal;
-    // move cursor to end for simplicity
-    amountIn.setSelectionRange(newVal.length, newVal.length);
-  }
-});
-
-targetInput.addEventListener('input', () => {
-  const oldVal = targetInput.value;
-  const newVal = formatNumberInput(oldVal);
-  if (newVal !== oldVal) {
-    targetInput.value = newVal;
-    targetInput.setSelectionRange(newVal.length, newVal.length);
-  }
-});
 
 const fmt = n => CURRENCY + Number(n).toLocaleString(undefined,
   { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -343,36 +616,8 @@ const fmt = n => CURRENCY + Number(n).toLocaleString(undefined,
 const esc = s => String(s).replace(/[&<>"']/g,
   c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
-const saveEntries = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-const saveTargets = () => localStorage.setItem(TARGET_KEY, JSON.stringify(targets));
-
-/* ---------- date helpers ---------- */
-const isoDate = d =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-
-const todayMonth = () => isoDate(new Date()).slice(0, 7);
-
-function monthLabel(m) {
-  const [y, mo] = m.split('-');
-  return new Date(+y, +mo - 1, 1).toLocaleString(undefined, { month: 'short', year: 'numeric' });
-}
-
-function monthAdd(m, delta) {
-  const [y, mo] = m.split('-').map(Number);
-  const d = new Date(y, mo - 1 + delta, 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
-/* default date for the entry form inside a given month */
-function defaultDateFor(m) {
-  const now = new Date();
-  return (m === todayMonth()) ? isoDate(now) : m + '-01';
-}
-
-let currentMonth = todayMonth();
-
 /* ============================================================
-   3. DATA HELPERS
+   6. DATA HELPERS
    ============================================================ */
 const monthEntries = m => entries.filter(e => e.date.startsWith(m));
 
@@ -391,7 +636,7 @@ function allMonths() {
 }
 
 /* ============================================================
-   4. PIE / DONUT CHART (canvas, no libraries)
+   7. PIE / DONUT CHART
    ============================================================ */
 function drawPie(canvas, data, total) {
   const ctx = canvas.getContext('2d');
@@ -473,7 +718,6 @@ function buildData(list, type) {
   const sums = new Map();
   list.filter(e => e.type === type)
       .forEach(e => sums.set(e.category, (sums.get(e.category) || 0) + e.amount));
-
   return [...sums.entries()]
     .map(([label, value]) => ({ label, value, color: colorFor(type, label) }))
     .sort((a, b) => b.value - a.value);
@@ -492,7 +736,7 @@ function renderCharts(list) {
 }
 
 /* ============================================================
-   5. RENDERERS
+   8. RENDERERS
    ============================================================ */
 function renderSavings(saved) {
   const tgt = targets[currentMonth] || 0;
@@ -525,12 +769,10 @@ function renderSavings(saved) {
 
 function renderTable(list) {
   const sorted = [...list].reverse().sort((a, b) => b.date.localeCompare(a.date));
-
   if (!sorted.length) {
     tbody.innerHTML = '<tr><td colspan="6" class="empty">No entries in this month yet — add one above.</td></tr>';
     return;
   }
-
   tbody.innerHTML = sorted.map(e => `
     <tr>
       <td>${esc(e.date)}</td>
@@ -553,13 +795,10 @@ function renderOverview() {
     const t = totals(monthEntries(m));
     const tgt = targets[m] || 0;
     const pct = tgt > 0 ? (t.saved / tgt * 100) : null;
-
     tInc += t.income; tExp += t.expense; tSaved += t.saved; tTgt += tgt;
-
     const progress = tgt > 0
       ? `<span class="mini"><i style="width:${Math.max(0, Math.min(100, pct))}%"></i></span>${pct.toFixed(0)}%`
       : '<span class="muted">—</span>';
-
     return `<tr data-month="${m}" class="${m === currentMonth ? 'active' : ''}">
       <td>${monthLabel(m)}</td>
       <td class="num">${fmt(t.income)}</td>
@@ -610,7 +849,7 @@ function renderAll() {
 }
 
 /* ============================================================
-   6. MONTH NAVIGATION
+   9. MONTH NAVIGATION
    ============================================================ */
 function setMonth(m) {
   currentMonth = m;
@@ -623,7 +862,7 @@ $('nextMonth').addEventListener('click', () => setMonth(monthAdd(currentMonth, 1
 monthSel.addEventListener('change', () => setMonth(monthSel.value));
 
 /* ============================================================
-   7. FORM & CATEGORIES
+   10. FORM & CATEGORIES
    ============================================================ */
 function fillCategoryOptions() {
   categorySel.innerHTML = CATEGORIES[typeSel.value]
@@ -631,8 +870,25 @@ function fillCategoryOptions() {
 }
 typeSel.addEventListener('change', fillCategoryOptions);
 
+/* live comma formatting */
+amountIn.addEventListener('input', () => {
+  const newVal = formatNumberInput(amountIn.value);
+  if (newVal !== amountIn.value) {
+    amountIn.value = newVal;
+    amountIn.setSelectionRange(newVal.length, newVal.length);
+  }
+});
+targetInput.addEventListener('input', () => {
+  const newVal = formatNumberInput(targetInput.value);
+  if (newVal !== targetInput.value) {
+    targetInput.value = newVal;
+    targetInput.setSelectionRange(newVal.length, newVal.length);
+  }
+});
+
 form.addEventListener('submit', ev => {
   ev.preventDefault();
+  if (!currentUser) return;
 
   const amount = parseFormattedNumber(amountIn.value);
   if (!(amount > 0)) { alert('Please enter an amount greater than 0.'); return; }
@@ -649,7 +905,6 @@ form.addEventListener('submit', ev => {
   });
   saveEntries();
 
-  // if the entry belongs to another month, jump to that month
   const mk = date.slice(0, 7);
   if (mk !== currentMonth) currentMonth = mk;
 
@@ -662,16 +917,14 @@ form.addEventListener('submit', ev => {
 });
 
 /* ============================================================
-   8. SAVINGS TARGET INPUT
+   11. SAVINGS TARGET INPUT
    ============================================================ */
 targetInput.addEventListener('input', () => {
+  if (!currentUser) return;
   const v = parseFormattedNumber(targetInput.value);
-
   if (!isFinite(v) || v <= 0) delete targets[currentMonth];
   else targets[currentMonth] = Math.round(v * 100) / 100;
-
   saveTargets();
-
   const t = totals(monthEntries(currentMonth));
   renderSavings(t.saved);
   renderOverview();
@@ -679,7 +932,7 @@ targetInput.addEventListener('input', () => {
 });
 
 /* ============================================================
-   9. DELETE / EXPORT / CLEAR
+   12. DELETE / EXPORT / CLEAR
    ============================================================ */
 tbody.addEventListener('click', ev => {
   const btn = ev.target.closest('.del');
@@ -709,13 +962,14 @@ $('exportBtn').addEventListener('click', () => {
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
   const a = document.createElement('a');
   a.href = url;
-  a.download = `financial-tracker-${currentMonth}.csv`;
+  a.download = `financial-tracker-${currentUser}-${currentMonth}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 });
 
 $('clearBtn').addEventListener('click', () => {
-  if (!confirm('Delete ALL entries and ALL targets permanently? This cannot be undone.')) return;
+  if (!currentUser) return;
+  if (!confirm(`Delete ALL your entries and ALL your targets for "${currentUser}"?\nThis cannot be undone.`)) return;
   entries = [];
   targets = {};
   saveEntries();
@@ -724,17 +978,40 @@ $('clearBtn').addEventListener('click', () => {
 });
 
 /* ============================================================
-   10. RESIZE + START
+   13. RESIZE
    ============================================================ */
 let resizeTimer;
 window.addEventListener('resize', () => {
+  if (!currentUser) return;
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => renderCharts(monthEntries(currentMonth)), 150);
 });
 
-dateInput.value = defaultDateFor(currentMonth);
-fillCategoryOptions();
-renderAll();
+/* ============================================================
+   14. APP INIT (called after successful login)
+   ============================================================ */
+function initApp() {
+  loadUserData();
+  dateInput.value = defaultDateFor(currentMonth);
+  fillCategoryOptions();
+  renderAll();
+  setTimeout(() => amountIn.focus(), 50);
+}
+
+/* ============================================================
+   15. BOOT — auto-login if session exists
+   ============================================================ */
+(function boot() {
+  setAuthMode('login');
+  const saved = localStorage.getItem(SESSION_KEY);
+  if (saved && users[saved]) {
+    doLogin(saved);
+  } else {
+    $('appScreen').classList.add('hidden');
+    $('authScreen').classList.remove('hidden');
+    $('authUser').focus();
+  }
+})();
 </script>
 </body>
 </html>
