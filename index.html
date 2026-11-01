@@ -18,6 +18,7 @@
   header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
   h1 { font-size: 22px; margin: 0; }
   h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .07em; color: #475467; margin: 0 0 14px; }
+  .hint { font-size: 12px; color: #667085; margin: -6px 0 14px; }
 
   .monthnav { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 4px; box-shadow: 0 1px 2px rgba(16,24,40,.06); }
   .monthnav select { min-width: 150px; border: none; background: transparent; font-weight: 600; padding: 6px 10px; }
@@ -120,7 +121,40 @@
   .legend .val b { font-size: 13px; }
   .legend .val em { font-style: normal; font-size: 11px; color: #667085; }
 
-  /* ---------- tables ---------- */
+  /* ---------- expense leakage analysis ---------- */
+  .leak-callout {
+    background: #fff8eb;
+    border: 1px solid #fde3b3;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #7a4b00;
+    margin-bottom: 14px;
+  }
+  .leak-callout b { color: #5c3a00; }
+  .leak-callout:empty { display: none; }
+
+  .breakdown-table th, .breakdown-table td { white-space: nowrap; }
+  .breakdown-table td:first-child, .breakdown-table th:first-child { white-space: normal; }
+  .cat-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    margin-right: 8px;
+    vertical-align: middle;
+    flex: 0 0 auto;
+  }
+  .share-wrap { display: flex; align-items: center; gap: 8px; min-width: 150px; }
+  .share-bar { flex: 1; height: 8px; background: #eef1f6; border-radius: 999px; overflow: hidden; min-width: 60px; }
+  .share-bar i { display: block; height: 100%; border-radius: 999px; transition: width .3s ease; }
+  .share-pct { font-size: 12px; color: #475467; width: 46px; text-align: right; font-variant-numeric: tabular-nums; }
+  .all-time-col { color: #667085; }
+  .breakdown-table tbody tr.top-leak td { background: #fffaf0; }
+  .breakdown-table tbody tr.top-leak:hover td { background: #fff4e0; }
+  .breakdown-table tfoot td { font-weight: 700; border-top: 2px solid #eaecf0; border-bottom: none; background: #fafbfc; }
+  .zero-pct { color: #98a2b3; }
+
+  /* ---------- tables (general) ---------- */
   .table-wrap { overflow-x: auto; margin-top: 14px; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #667085; padding: 8px 10px; border-bottom: 1px solid #eaecf0; }
@@ -248,6 +282,29 @@
         <canvas id="incomePie"></canvas>
         <ul class="legend" id="incomeLegend"></ul>
       </div>
+    </div>
+  </section>
+
+  <!-- EXPENSE LEAKAGE ANALYSIS -->
+  <section class="panel">
+    <h2>🔍 Expense leakage analysis — <span id="breakdownMonthLabel"></span></h2>
+    <p class="hint">Totals for every expense category, sorted by biggest spend this month. The all-time column reveals chronic leakages across every month.</p>
+    <div class="leak-callout" id="breakdownCallout"></div>
+    <div class="table-wrap" style="margin-top:0;">
+      <table class="breakdown-table" id="breakdownTable">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th class="right">This month</th>
+            <th>Share of expenses</th>
+            <th class="right">Entries</th>
+            <th class="right">Avg / entry</th>
+            <th class="right">All-time total</th>
+          </tr>
+        </thead>
+        <tbody id="breakdownBody"></tbody>
+        <tfoot id="breakdownFoot"></tfoot>
+      </table>
     </div>
   </section>
 
@@ -465,7 +522,7 @@ const openingFor = m => {
   return isFinite(v) ? Math.round(v * 100) / 100 : 0;
 };
 
-/* THE formula the user asked for: opening + this month's net */
+/* opening + this month's net */
 function savedSoFarFor(m) {
   return openingFor(m) + totals(monthEntries(m)).saved;
 }
@@ -580,7 +637,101 @@ function renderCharts(list) {
 }
 
 /* ============================================================
-   6. CARDS
+   6. EXPENSE LEAKAGE ANALYSIS
+   ============================================================ */
+function expenseCategoryUnion() {
+  const set = new Set(CATEGORIES.expense);
+  entries.filter(e => e.type === 'expense').forEach(e => set.add(e.category));
+  return [...set];
+}
+
+function renderExpenseBreakdown(monthList) {
+  const bodyEl = $('breakdownBody');
+  const footEl = $('breakdownFoot');
+  const callout = $('breakdownCallout');
+
+  const monthExp = monthList.filter(e => e.type === 'expense');
+  const allExp   = entries.filter(e => e.type === 'expense');
+
+  const totalMonth = monthExp.reduce((s, e) => s + e.amount, 0);
+  const totalAll   = allExp.reduce((s, e) => s + e.amount, 0);
+
+  /* aggregate per category */
+  const rows = expenseCategoryUnion().map(cat => {
+    const m = monthExp.filter(e => e.category === cat);
+    const a = allExp.filter(e => e.category === cat);
+    return {
+      cat,
+      month: m.reduce((s, e) => s + e.amount, 0),
+      monthCount: m.length,
+      all: a.reduce((s, e) => s + e.amount, 0),
+      allCount: a.length
+    };
+  });
+
+  /* only show categories with any activity (this month or all-time) */
+  const visible = rows
+    .filter(r => r.month > 0 || r.all > 0)
+    .sort((x, y) => y.month - x.month || y.all - x.all);
+
+  if (!visible.length) {
+    bodyEl.innerHTML = '<tr><td colspan="6" class="empty">No expenses recorded yet — add one to see the breakdown.</td></tr>';
+    footEl.innerHTML = '';
+    callout.innerHTML = '';
+    return;
+  }
+
+  const topLeak = visible[0].month;   /* largest this-month total */
+
+  bodyEl.innerHTML = visible.map(r => {
+    const pct = totalMonth > 0 ? (r.month / totalMonth * 100) : 0;
+    const color = colorFor('expense', r.cat);
+    const avg = r.monthCount > 0 ? r.month / r.monthCount : 0;
+    const isTop = r.month > 0 && r.month === topLeak;
+
+    return `<tr class="${isTop ? 'top-leak' : ''}">
+      <td><span class="cat-dot" style="background:${color}"></span>${esc(r.cat)}</td>
+      <td class="num" style="font-weight:700;color:${r.month > 0 ? '#101828' : '#98a2b3'}">${fmt(r.month)}</td>
+      <td>
+        <div class="share-wrap">
+          <div class="share-bar"><i style="width:${Math.max(0, Math.min(100, pct))}%;background:${color}"></i></div>
+          <span class="share-pct ${r.month > 0 ? '' : 'zero-pct'}">${pct.toFixed(1)}%</span>
+        </div>
+      </td>
+      <td class="num">${r.monthCount}</td>
+      <td class="num">${r.monthCount ? fmt(avg) : '—'}</td>
+      <td class="num all-time-col">${r.all > 0 ? fmt(r.all) : '—'}</td>
+    </tr>`;
+  }).join('');
+
+  footEl.innerHTML = `<tr>
+    <td>Total</td>
+    <td class="num">${fmt(totalMonth)}</td>
+    <td class="num">${totalMonth > 0 ? '100%' : '—'}</td>
+    <td class="num">${monthExp.length}</td>
+    <td class="num">${monthExp.length ? fmt(totalMonth / monthExp.length) : '—'}</td>
+    <td class="num all-time-col">${fmt(totalAll)}</td>
+  </tr>`;
+
+  /* callout: biggest leak this month, with all-time context */
+  const top = visible[0];
+  if (top.month > 0) {
+    const pct = top.month / totalMonth * 100;
+    const allTimeTop = [...visible].sort((a, b) => b.all - a.all)[0];
+    let extra = '';
+    if (allTimeTop && allTimeTop.cat !== top.cat && allTimeTop.all > 0) {
+      extra = ` · all-time biggest is <b>${esc(allTimeTop.cat)}</b> (${fmt(allTimeTop.all)})`;
+    }
+    callout.innerHTML =
+      `🔎 Biggest expense this month: <b>${esc(top.cat)}</b> — <b>${fmt(top.month)}</b> ` +
+      `(${pct.toFixed(1)}% of all expenses, ${top.monthCount} entr${top.monthCount === 1 ? 'y' : 'ies'})${extra}`;
+  } else {
+    callout.innerHTML = '';
+  }
+}
+
+/* ============================================================
+   7. CARDS
    ============================================================ */
 function renderCards(t) {
   $('totalIncome').textContent  = fmt(t.income);
@@ -616,7 +767,7 @@ function renderCards(t) {
 }
 
 /* ============================================================
-   7. TARGET PANEL
+   8. TARGET PANEL
    ============================================================ */
 function renderSavings(t) {
   const tgt = targets[currentMonth] || 0;
@@ -654,7 +805,7 @@ function renderSavings(t) {
 }
 
 /* ============================================================
-   8. ENTRY TABLE
+   9. ENTRY TABLE
    ============================================================ */
 function renderTable(list) {
   const sorted = [...list].reverse().sort((a, b) => b.date.localeCompare(a.date));
@@ -674,7 +825,7 @@ function renderTable(list) {
 }
 
 /* ============================================================
-   9. MONTHLY OVERVIEW
+   10. MONTHLY OVERVIEW
    ============================================================ */
 function renderOverview() {
   const months = allMonths();          // descending
@@ -708,7 +859,6 @@ function renderOverview() {
     </tr>`;
   }).join('');
 
-  /* footer: totals for income/expense/saved, latest closing for "saved so far" */
   const latest = months[0];
   const latestSoFar = latest ? savedSoFarFor(latest) : 0;
   tfootEl.innerHTML = `<tr>
@@ -724,7 +874,7 @@ function renderOverview() {
 }
 
 /* ============================================================
-   10. MASTER RENDER
+   11. MASTER RENDER
    ============================================================ */
 function refreshMonthSelect() {
   const months = allMonths();
@@ -743,16 +893,18 @@ function renderAll() {
   $('targetMonthLabel').textContent = label;
   $('formMonthLabel').textContent   = label;
   $('entryMonthLabel').textContent  = label;
+  $('breakdownMonthLabel').textContent = label;
 
   renderSavings(t);
   renderCharts(list);
+  renderExpenseBreakdown(list);
   renderTable(list);
   renderOverview();
   refreshMonthSelect();
 }
 
 /* ============================================================
-   11. OPENING EDITOR
+   12. OPENING EDITOR
    ============================================================ */
 let editingOpening = false;
 
@@ -762,7 +914,6 @@ function openOpeningEditor() {
 
   let current = openings[currentMonth];
   if (current === undefined) {
-    /* default: suggest previous month's saved-so-far */
     const prev = monthAdd(currentMonth, -1);
     const prevHasData =
       monthEntries(prev).length > 0 || openings[prev] !== undefined;
@@ -817,7 +968,7 @@ openingInput.addEventListener('keydown', ev => {
 openingInput.addEventListener('blur', () => closeOpeningEditor(true));
 
 /* ============================================================
-   12. MONTH NAVIGATION
+   13. MONTH NAVIGATION
    ============================================================ */
 function setMonth(m) {
   currentMonth = m;
@@ -830,7 +981,7 @@ $('nextMonth').addEventListener('click', () => setMonth(monthAdd(currentMonth, 1
 monthSel.addEventListener('change', () => setMonth(monthSel.value));
 
 /* ============================================================
-   13. FORM & CATEGORIES
+   14. FORM & CATEGORIES
    ============================================================ */
 function fillCategoryOptions() {
   categorySel.innerHTML = CATEGORIES[typeSel.value]
@@ -883,7 +1034,7 @@ form.addEventListener('submit', ev => {
 });
 
 /* ============================================================
-   14. TARGET INPUT
+   15. TARGET INPUT
    ============================================================ */
 targetInput.addEventListener('input', () => {
   const v = parseFormattedNumber(targetInput.value);
@@ -897,7 +1048,7 @@ targetInput.addEventListener('input', () => {
 });
 
 /* ============================================================
-   15. DELETE / EXPORT / CLEAR
+   16. DELETE / EXPORT / CLEAR
    ============================================================ */
 tbody.addEventListener('click', ev => {
   const btn = ev.target.closest('.del');
@@ -944,7 +1095,7 @@ $('clearBtn').addEventListener('click', () => {
 });
 
 /* ============================================================
-   16. RESIZE + START
+   17. RESIZE + START
    ============================================================ */
 let resizeTimer;
 window.addEventListener('resize', () => {
